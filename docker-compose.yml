@@ -1,0 +1,204 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: contentmodels
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/db-init.sql:/docker-entrypoint-initdb.d/db-init.sql:ro
+    ports:
+      - "5432:5432"
+
+  contentmodels-api:
+    build:
+      context: .
+      dockerfile: ContentModels.Api/Dockerfile
+    container_name: contentmodels-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__ContentModelsDb: Host=postgres;Port=5432;Database=contentmodels;Username=postgres;Password=postgres
+    ports:
+      - "5001:8080"
+
+  globalfields-api:
+    build:
+      context: .
+      dockerfile: GlobalFields.Api/Dockerfile
+    container_name: globalfields-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__GlobalFieldsDb: Host=postgres;Port=5432;Database=globalfields;Username=postgres;Password=postgres
+    ports:
+      - "5002:8080"
+
+  entries-api:
+    build:
+      context: .
+      dockerfile: Entries.Api/Dockerfile
+    container_name: entries-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__EntriesDb: Host=postgres;Port=5432;Database=entries;Username=postgres;Password=postgres
+    ports:
+      - "5003:8080"
+
+  assets-api:
+    build:
+      context: .
+      dockerfile: Assets.Api/Dockerfile
+    container_name: assets-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__AssetsDb: Host=postgres;Port=5432;Database=assets;Username=postgres;Password=postgres
+    ports:
+      - "5004:8080"
+
+  auth-api:
+    build:
+      context: .
+      dockerfile: Auth.Api/Dockerfile
+    container_name: auth-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__AuthDb: Host=postgres;Port=5432;Database=auth;Username=postgres;Password=postgres
+    ports:
+      - "5005:8080"
+
+  tenants-api:
+    build:
+      context: .
+      dockerfile: Tenants.Api/Dockerfile
+    container_name: tenants-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__TenantsDb: Host=postgres;Port=5432;Database=tenants;Username=postgres;Password=postgres
+    ports:
+      - "5006:8080"
+
+  organizations-api:
+    build:
+      context: .
+      dockerfile: Organizations.Api/Dockerfile
+    container_name: organizations-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__OrganizationsDb: Host=postgres;Port=5432;Database=organizations;Username=postgres;Password=postgres
+    ports:
+      - "5007:8080"
+
+  environments-api:
+    build:
+      context: .
+      dockerfile: Environments.Api/Dockerfile
+    container_name: environments-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__EnvironmentsDb: Host=postgres;Port=5432;Database=environments;Username=postgres;Password=postgres
+    ports:
+      - "5008:8080"
+
+  roles-api:
+    build:
+      context: .
+      dockerfile: Roles.Api/Dockerfile
+    container_name: roles-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__RolesDb: Host=postgres;Port=5432;Database=roles;Username=postgres;Password=postgres
+    ports:
+      - "5009:8080"
+
+  workflows-api:
+    build:
+      context: .
+      dockerfile: Workflows.Api/Dockerfile
+    container_name: workflows-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__WorkflowsDb: Host=postgres;Port=5432;Database=workflows;Username=postgres;Password=postgres
+    ports:
+      - "5010:8080"
+
+  webhooks-api:
+    build:
+      context: .
+      dockerfile: Webhooks.Api/Dockerfile
+    container_name: webhooks-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__WebhooksDb: Host=postgres;Port=5432;Database=webhooks;Username=postgres;Password=postgres
+    ports:
+      - "5011:8080"
+
+  delivery-api:
+    build:
+      context: .
+      dockerfile: Delivery.Api/Dockerfile
+    container_name: delivery-api
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DeliveryDb: Host=postgres;Port=5432;Database=delivery;Username=postgres;Password=postgres
+    ports:
+      - "5012:8080"
+
+  search-api:
+    build:
+      context: .
+      dockerfile: Search.Api/Dockerfile
+    container_name: search-api
+    depends_on:
+      - postgres
+      - elasticsearch
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__SearchDb: Host=postgres;Port=5432;Database=search;Username=postgres;Password=postgres
+      Elastic__Uri: http://elasticsearch:9200
+      Elastic__Index: entries
+    ports:
+      - "5013:8080"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: cms-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+
+volumes:
+  postgres-data:
+  elastic-data:

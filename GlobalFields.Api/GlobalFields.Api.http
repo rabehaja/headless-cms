@@ -1,0 +1,6 @@
+@GlobalFields.Api_HostAddress = http://localhost:0
+
+GET {{GlobalFields.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
