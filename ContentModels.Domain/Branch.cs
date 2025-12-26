@@ -5,6 +5,11 @@ public class Branch
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid TenantId { get; set; }
     public string Name { get; set; } = string.Empty;
+    public Guid? ParentBranchId { get; set; }
+    public bool IsDefault { get; set; }
+    public BranchState State { get; set; } = BranchState.Active;
+    public Guid? LastSyncedFromBranchId { get; set; }
+    public DateTime? LastSyncedAt { get; set; }
     public List<ContentModel> ContentModels { get; set; } = new();
 
     public ContentModel AddContentModel(string name, string? description, List<FieldDefinition> fields, ContentModelSettings settings)

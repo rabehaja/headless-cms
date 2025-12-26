@@ -5,7 +5,7 @@ using Workflows.Api.Application;
 namespace Workflows.Api.Controllers;
 
 [ApiController]
-[Route("tenants/{tenantId:guid}/workflows")]
+[Route("stacks/{stackId:guid}/tenants/{tenantId:guid}/branches/{branchId:guid}/workflows")]
 public class WorkflowsController : ControllerBase
 {
     private readonly WorkflowService _service;
@@ -16,37 +16,37 @@ public class WorkflowsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Workflow>>> GetWorkflows(Guid tenantId)
+    public async Task<ActionResult<IEnumerable<Workflow>>> GetWorkflows(Guid stackId, Guid tenantId, Guid branchId)
     {
-        var workflows = await _service.GetAsync(tenantId);
+        var workflows = await _service.GetAsync(tenantId, branchId);
         return Ok(workflows);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<Workflow>> GetWorkflow(Guid tenantId, Guid id)
+    public async Task<ActionResult<Workflow>> GetWorkflow(Guid stackId, Guid tenantId, Guid branchId, Guid id)
     {
-        var wf = await _service.GetOneAsync(tenantId, id);
+        var wf = await _service.GetOneAsync(tenantId, branchId, id);
         return wf is null ? NotFound() : Ok(wf);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Workflow>> CreateWorkflow(Guid tenantId, [FromBody] CreateWorkflowRequest request)
+    public async Task<ActionResult<Workflow>> CreateWorkflow(Guid stackId, Guid tenantId, Guid branchId, [FromBody] CreateWorkflowRequest request)
     {
-        var wf = await _service.CreateAsync(tenantId, request.Name, request.Steps ?? new List<WorkflowStep>());
-        return CreatedAtAction(nameof(GetWorkflow), new { tenantId, id = wf.Id }, wf);
+        var wf = await _service.CreateAsync(stackId, tenantId, branchId, request.Name, request.Steps ?? new List<WorkflowStep>());
+        return CreatedAtAction(nameof(GetWorkflow), new { stackId, tenantId, branchId, id = wf.Id }, wf);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult> UpdateWorkflow(Guid tenantId, Guid id, [FromBody] UpdateWorkflowRequest request)
+    public async Task<ActionResult> UpdateWorkflow(Guid stackId, Guid tenantId, Guid branchId, Guid id, [FromBody] UpdateWorkflowRequest request)
     {
-        var updated = await _service.UpdateAsync(tenantId, id, request.Name, request.Steps);
+        var updated = await _service.UpdateAsync(stackId, tenantId, branchId, id, request.Name, request.Steps);
         return updated ? NoContent() : NotFound();
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> DeleteWorkflow(Guid tenantId, Guid id)
+    public async Task<ActionResult> DeleteWorkflow(Guid stackId, Guid tenantId, Guid branchId, Guid id)
     {
-        var deleted = await _service.DeleteAsync(tenantId, id);
+        var deleted = await _service.DeleteAsync(stackId, tenantId, branchId, id);
         return deleted ? NoContent() : NotFound();
     }
 }

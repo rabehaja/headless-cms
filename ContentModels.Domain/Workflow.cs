@@ -4,6 +4,7 @@ public class Workflow
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid TenantId { get; set; }
+    public Guid BranchId { get; set; }
     public string Name { get; set; } = string.Empty;
     public List<WorkflowStep> Steps { get; set; } = new();
 }

@@ -1,10 +1,12 @@
+using ContentModels.Api.Application;
 using ContentModels.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tenants.Api.Application;
 
-namespace Tenants.Api.Controllers;
+namespace ContentModels.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("stacks")]
 public class StacksController : ControllerBase
 {

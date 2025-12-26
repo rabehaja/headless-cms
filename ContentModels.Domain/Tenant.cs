@@ -4,8 +4,8 @@ public class Tenant
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
-    public Guid OrganizationId { get; set; }
-    public Guid? StackId { get; set; }
+    public Guid? OrganizationId { get; set; }
+    public Guid StackId { get; set; }
     public List<Branch> Branches { get; set; } = new();
 
     public Branch AddBranch(string name)

@@ -56,7 +56,11 @@ public class ContentModelsApiTests : IClassFixture<ContentModelsApiFactory>
         var orgBody = await org.Content.ReadFromJsonAsync<Organization>();
         Assert.NotNull(orgBody);
 
-        var tenantResponse = await _client.PostAsJsonAsync($"/organizations/{orgBody!.Id}/tenants", new { Name = "Tenant1" });
+        var stackResponse = await _client.PostAsJsonAsync($"/stacks", new { Name = "Stack1", OrganizationId = orgBody!.Id });
+        var stack = await stackResponse.Content.ReadFromJsonAsync<ContentModels.Domain.Stack>();
+        Assert.NotNull(stack);
+
+        var tenantResponse = await _client.PostAsJsonAsync($"/stacks/{stack!.Id}/tenants", new { Name = "Tenant1" });
         Assert.Equal(HttpStatusCode.Created, tenantResponse.StatusCode);
     }
 }

@@ -22,12 +22,14 @@ public class ContentModelsDbContext : DbContext
             .HasMany(o => o.Tenants)
             .WithOne()
             .HasForeignKey(t => t.OrganizationId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Organization>()
             .HasMany(o => o.Stacks)
             .WithOne()
             .HasForeignKey(s => s.OrganizationId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Stack>()

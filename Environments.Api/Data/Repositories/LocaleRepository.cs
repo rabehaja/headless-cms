@@ -13,11 +13,11 @@ public class LocaleRepository : ILocaleRepository
         _db = db;
     }
 
-    public Task<Locale?> GetAsync(Guid tenantId, Guid id, CancellationToken cancellationToken = default) =>
-        _db.Locales.FirstOrDefaultAsync(l => l.Id == id && l.TenantId == tenantId, cancellationToken);
+    public Task<Locale?> GetAsync(Guid tenantId, Guid branchId, Guid id, CancellationToken cancellationToken = default) =>
+        _db.Locales.FirstOrDefaultAsync(l => l.Id == id && l.TenantId == tenantId && l.BranchId == branchId, cancellationToken);
 
-    public Task<List<Locale>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        _db.Locales.Where(l => l.TenantId == tenantId).ToListAsync(cancellationToken);
+    public Task<List<Locale>> GetByBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default) =>
+        _db.Locales.Where(l => l.TenantId == tenantId && l.BranchId == branchId).ToListAsync(cancellationToken);
 
     public async Task AddAsync(Locale locale, CancellationToken cancellationToken = default)
     {

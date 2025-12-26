@@ -6,7 +6,7 @@ using Webhooks.Api.Services;
 namespace Webhooks.Api.Controllers;
 
 [ApiController]
-[Route("tenants/{tenantId:guid}/branches/{branchId:guid}/webhooks")]
+[Route("stacks/{stackId:guid}/tenants/{tenantId:guid}/branches/{branchId:guid}/webhooks")]
 public class WebhooksController : ControllerBase
 {
     private readonly WebhookService _service;
@@ -19,24 +19,24 @@ public class WebhooksController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<WebhookSubscription>>> GetWebhooks(Guid tenantId, Guid branchId)
+    public async Task<ActionResult<IEnumerable<WebhookSubscription>>> GetWebhooks(Guid stackId, Guid tenantId, Guid branchId)
     {
         var hooks = await _service.GetAsync(tenantId, branchId);
         return Ok(hooks);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<WebhookSubscription>> GetWebhook(Guid tenantId, Guid branchId, Guid id)
+    public async Task<ActionResult<WebhookSubscription>> GetWebhook(Guid stackId, Guid tenantId, Guid branchId, Guid id)
     {
         var hook = await _service.GetOneAsync(tenantId, branchId, id);
         return hook is null ? NotFound() : Ok(hook);
     }
 
     [HttpPost]
-    public async Task<ActionResult<WebhookSubscription>> CreateWebhook(Guid tenantId, Guid branchId, [FromBody] CreateWebhookRequest request)
+    public async Task<ActionResult<WebhookSubscription>> CreateWebhook(Guid stackId, Guid tenantId, Guid branchId, [FromBody] CreateWebhookRequest request)
     {
         var hook = await _service.CreateAsync(tenantId, branchId, request.Name, request.Url, request.Events ?? new List<string>(), request.Active, request.Secret ?? Guid.NewGuid().ToString("N"), request.MaxRetries ?? 3);
-        return CreatedAtAction(nameof(GetWebhook), new { tenantId, branchId, id = hook.Id }, hook);
+        return CreatedAtAction(nameof(GetWebhook), new { stackId, tenantId, branchId, id = hook.Id }, hook);
     }
 
     [HttpPut("{id:guid}")]

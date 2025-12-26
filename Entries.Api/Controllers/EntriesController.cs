@@ -7,7 +7,7 @@ namespace Entries.Api.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("organizations/{organizationId:guid}/tenants/{tenantId:guid}/branches/{branchId:guid}/content-models/{modelId:guid}/entries")]
+[Route("stacks/{stackId:guid}/tenants/{tenantId:guid}/branches/{branchId:guid}/content-models/{modelId:guid}/entries")]
 public class EntriesController : ControllerBase
 {
     private readonly EntryService _service;
@@ -18,21 +18,21 @@ public class EntriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Entry>>> GetEntries(Guid tenantId, Guid branchId, Guid modelId, [FromQuery] Guid? environmentId, [FromQuery] string? locale)
+    public async Task<ActionResult<IEnumerable<Entry>>> GetEntries(Guid stackId, Guid tenantId, Guid branchId, Guid modelId, [FromQuery] Guid? environmentId, [FromQuery] string? locale)
     {
         var entries = await _service.GetAsync(tenantId, branchId, modelId, environmentId, locale);
         return Ok(entries);
     }
 
     [HttpGet("{entryId:guid}")]
-    public async Task<ActionResult<Entry>> GetEntry(Guid tenantId, Guid branchId, Guid modelId, Guid entryId)
+    public async Task<ActionResult<Entry>> GetEntry(Guid stackId, Guid tenantId, Guid branchId, Guid modelId, Guid entryId)
     {
         var entry = await _service.GetOneAsync(tenantId, branchId, modelId, entryId);
         return entry is null ? NotFound() : Ok(entry);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Entry>> Create(Guid tenantId, Guid branchId, Guid modelId, [FromBody] CreateEntryRequest request)
+    public async Task<ActionResult<Entry>> Create(Guid stackId, Guid tenantId, Guid branchId, Guid modelId, [FromBody] CreateEntryRequest request)
     {
         var entry = await _service.CreateAsync(
             tenantId,

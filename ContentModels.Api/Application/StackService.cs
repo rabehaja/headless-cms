@@ -1,7 +1,7 @@
 using ContentModels.Domain;
 using ContentModels.Domain.Repositories;
 
-namespace Tenants.Api.Application;
+namespace ContentModels.Api.Application;
 
 public class StackService
 {

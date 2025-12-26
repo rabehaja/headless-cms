@@ -5,7 +5,7 @@ using Tenants.Api.Application;
 namespace Tenants.Api.Controllers;
 
 [ApiController]
-[Route("organizations/{organizationId:guid}/tenants")]
+[Route("stacks/{stackId:guid}/tenants")]
 public class TenantsController : ControllerBase
 {
     private readonly TenantService _tenantService;
@@ -16,21 +16,21 @@ public class TenantsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Tenant>>> GetTenants(Guid organizationId)
+    public async Task<ActionResult<IEnumerable<Tenant>>> GetTenants(Guid stackId)
     {
-        var tenants = await _tenantService.GetByOrganizationAsync(organizationId);
+        var tenants = await _tenantService.GetByStackAsync(stackId);
         return Ok(tenants);
     }
 
     [HttpGet("{tenantId:guid}")]
-    public async Task<ActionResult<Tenant>> GetTenant(Guid organizationId, Guid tenantId)
+    public async Task<ActionResult<Tenant>> GetTenant(Guid stackId, Guid tenantId)
     {
-        var tenant = await _tenantService.GetAsync(organizationId, tenantId);
+        var tenant = await _tenantService.GetAsync(stackId, tenantId);
         return tenant is null ? NotFound() : Ok(tenant);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Tenant>> CreateTenant(Guid organizationId, [FromBody] CreateTenantRequest request)
+    public async Task<ActionResult<Tenant>> CreateTenant(Guid stackId, [FromBody] CreateTenantRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
         {
@@ -39,8 +39,8 @@ public class TenantsController : ControllerBase
 
         try
         {
-            var tenant = await _tenantService.CreateAsync(organizationId, request.Name, request.StackId);
-            return CreatedAtAction(nameof(GetTenant), new { organizationId, tenantId = tenant.Id }, tenant);
+            var tenant = await _tenantService.CreateAsync(stackId, request.Name);
+            return CreatedAtAction(nameof(GetTenant), new { stackId, tenantId = tenant.Id }, tenant);
         }
         catch (InvalidOperationException ex)
         {
@@ -49,4 +49,4 @@ public class TenantsController : ControllerBase
     }
 }
 
-public record CreateTenantRequest(string Name, Guid? StackId);
+public record CreateTenantRequest(string Name);

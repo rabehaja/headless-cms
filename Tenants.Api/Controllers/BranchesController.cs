@@ -5,7 +5,7 @@ using Tenants.Api.Application;
 namespace Tenants.Api.Controllers;
 
 [ApiController]
-[Route("organizations/{organizationId:guid}/tenants/{tenantId:guid}/branches")]
+[Route("stacks/{stackId:guid}/tenants/{tenantId:guid}/branches")]
 public class BranchesController : ControllerBase
 {
     private readonly BranchService _branchService;
@@ -16,11 +16,11 @@ public class BranchesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Branch>>> GetBranches(Guid organizationId, Guid tenantId)
+    public async Task<ActionResult<IEnumerable<Branch>>> GetBranches(Guid stackId, Guid tenantId)
     {
         try
         {
-            var branches = await _branchService.GetByTenantAsync(organizationId, tenantId);
+            var branches = await _branchService.GetByTenantAsync(stackId, tenantId);
             return Ok(branches);
         }
         catch (InvalidOperationException)
@@ -30,14 +30,14 @@ public class BranchesController : ControllerBase
     }
 
     [HttpGet("{branchId:guid}")]
-    public async Task<ActionResult<Branch>> GetBranch(Guid organizationId, Guid tenantId, Guid branchId)
+    public async Task<ActionResult<Branch>> GetBranch(Guid stackId, Guid tenantId, Guid branchId)
     {
-        var branch = await _branchService.GetAsync(organizationId, tenantId, branchId);
+        var branch = await _branchService.GetAsync(stackId, tenantId, branchId);
         return branch is null ? NotFound() : Ok(branch);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Branch>> CreateBranch(Guid organizationId, Guid tenantId, [FromBody] CreateBranchRequest request)
+    public async Task<ActionResult<Branch>> CreateBranch(Guid stackId, Guid tenantId, [FromBody] CreateBranchRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
         {
@@ -46,8 +46,8 @@ public class BranchesController : ControllerBase
 
         try
         {
-            var branch = await _branchService.CreateAsync(organizationId, tenantId, request.Name);
-            return CreatedAtAction(nameof(GetBranch), new { organizationId, tenantId, branchId = branch.Id }, branch);
+            var branch = await _branchService.CreateAsync(stackId, tenantId, request.Name, request.IsDefault, request.ParentBranchId);
+            return CreatedAtAction(nameof(GetBranch), new { stackId, tenantId, branchId = branch.Id }, branch);
         }
         catch (InvalidOperationException ex)
         {
@@ -56,4 +56,4 @@ public class BranchesController : ControllerBase
     }
 }
 
-public record CreateBranchRequest(string Name);
+public record CreateBranchRequest(string Name, bool IsDefault = false, Guid? ParentBranchId = null);

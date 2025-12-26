@@ -15,11 +15,11 @@ public class WebhookNotifier : IWebhookNotifier
         _baseUrl = configuration["Webhooks:BaseUrl"] ?? "http://webhooks-api:8080";
     }
 
-    public async Task NotifyAsync(Guid tenantId, string @event, object payload, CancellationToken cancellationToken = default)
+    public async Task NotifyAsync(Guid stackId, Guid tenantId, Guid branchId, string @event, object payload, CancellationToken cancellationToken = default)
     {
         try
         {
-            var url = $"{_baseUrl}/tenants/{tenantId}/webhooks/dispatch";
+            var url = $"{_baseUrl}/stacks/{stackId}/tenants/{tenantId}/branches/{branchId}/webhooks/dispatch";
             var response = await _httpClient.PostAsJsonAsync(url, new { Event = @event, Payload = payload }, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {

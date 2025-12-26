@@ -7,14 +7,14 @@ public class Organization
     public List<Tenant> Tenants { get; set; } = new();
     public List<Stack> Stacks { get; set; } = new();
 
-    public Tenant AddTenant(string name)
+    public Tenant AddTenant(string name, Guid stackId)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             throw new ArgumentException("Tenant name is required.", nameof(name));
         }
 
-        var tenant = new Tenant { Name = name.Trim(), OrganizationId = Id };
+        var tenant = new Tenant { Name = name.Trim(), OrganizationId = Id, StackId = stackId };
         tenant.AddBranch("main");
         Tenants.Add(tenant);
         return tenant;

@@ -13,11 +13,11 @@ public class WorkflowRepository : IWorkflowRepository
         _db = db;
     }
 
-    public Task<Workflow?> GetAsync(Guid tenantId, Guid id, CancellationToken cancellationToken = default) =>
-        _db.Workflows.FirstOrDefaultAsync(w => w.Id == id && w.TenantId == tenantId, cancellationToken);
+    public Task<Workflow?> GetAsync(Guid tenantId, Guid branchId, Guid id, CancellationToken cancellationToken = default) =>
+        _db.Workflows.FirstOrDefaultAsync(w => w.Id == id && w.TenantId == tenantId && w.BranchId == branchId, cancellationToken);
 
-    public Task<List<Workflow>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        _db.Workflows.Where(w => w.TenantId == tenantId).ToListAsync(cancellationToken);
+    public Task<List<Workflow>> GetByBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default) =>
+        _db.Workflows.Where(w => w.TenantId == tenantId && w.BranchId == branchId).ToListAsync(cancellationToken);
 
     public async Task AddAsync(Workflow workflow, CancellationToken cancellationToken = default)
     {

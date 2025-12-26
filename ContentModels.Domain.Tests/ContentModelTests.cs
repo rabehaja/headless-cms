@@ -28,7 +28,7 @@ public class ContentModelTests
     [Fact]
     public void Tenant_AddContentModel_EnforcesUniqueName()
     {
-        var tenant = new Tenant { Name = "Tenant" };
+        var tenant = new Tenant { Name = "Tenant", StackId = Guid.NewGuid() };
         var branch = tenant.AddBranch("main");
         branch.AddContentModel("Article", null, new List<FieldDefinition>(), new ContentModelSettings());
 
