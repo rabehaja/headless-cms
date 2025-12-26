@@ -16,8 +16,12 @@ builder.Services.AddDbContext<TenantsDbContext>(options =>
 });
 builder.Services.AddScoped<OrganizationService>();
 builder.Services.AddScoped<TenantService>();
+builder.Services.AddScoped<StackService>();
+builder.Services.AddScoped<BranchService>();
 builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
+builder.Services.AddScoped<IStackRepository, StackRepository>();
+builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 
 var app = builder.Build();
 

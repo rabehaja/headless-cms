@@ -12,17 +12,18 @@ public class AssetService
         _repository = repository;
     }
 
-    public Task<List<Asset>> GetAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        _repository.GetByTenantAsync(tenantId, cancellationToken);
+    public Task<List<Asset>> GetAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default) =>
+        _repository.GetByBranchAsync(tenantId, branchId, cancellationToken);
 
-    public Task<Asset?> GetOneAsync(Guid tenantId, Guid assetId, CancellationToken cancellationToken = default) =>
-        _repository.GetAsync(tenantId, assetId, cancellationToken);
+    public Task<Asset?> GetOneAsync(Guid tenantId, Guid branchId, Guid assetId, CancellationToken cancellationToken = default) =>
+        _repository.GetAsync(tenantId, branchId, assetId, cancellationToken);
 
-    public async Task<Asset> CreateAsync(Guid tenantId, string fileName, string contentType, long sizeBytes, string url, string? description, CancellationToken cancellationToken = default)
+    public async Task<Asset> CreateAsync(Guid tenantId, Guid branchId, string fileName, string contentType, long sizeBytes, string url, string? description, CancellationToken cancellationToken = default)
     {
         var asset = new Asset
         {
             TenantId = tenantId,
+            BranchId = branchId,
             FileName = fileName,
             ContentType = contentType,
             SizeBytes = sizeBytes,
@@ -35,9 +36,9 @@ public class AssetService
         return asset;
     }
 
-    public async Task<bool> UpdateAsync(Guid tenantId, Guid assetId, string? fileName, string? contentType, long? sizeBytes, string? url, string? description, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(Guid tenantId, Guid branchId, Guid assetId, string? fileName, string? contentType, long? sizeBytes, string? url, string? description, CancellationToken cancellationToken = default)
     {
-        var asset = await _repository.GetAsync(tenantId, assetId, cancellationToken);
+        var asset = await _repository.GetAsync(tenantId, branchId, assetId, cancellationToken);
         if (asset is null) return false;
 
         if (!string.IsNullOrWhiteSpace(fileName)) asset.FileName = fileName;
@@ -50,9 +51,9 @@ public class AssetService
         return true;
     }
 
-    public async Task<bool> DeleteAsync(Guid tenantId, Guid assetId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid branchId, Guid assetId, CancellationToken cancellationToken = default)
     {
-        var asset = await _repository.GetAsync(tenantId, assetId, cancellationToken);
+        var asset = await _repository.GetAsync(tenantId, branchId, assetId, cancellationToken);
         if (asset is null) return false;
 
         await _repository.RemoveAsync(asset, cancellationToken);

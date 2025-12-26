@@ -13,12 +13,12 @@ public class EntryRepository : IEntryRepository
         _db = db;
     }
 
-    public Task<Entry?> GetAsync(Guid tenantId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default) =>
-        _db.Entries.FirstOrDefaultAsync(e => e.Id == entryId && e.TenantId == tenantId && e.ContentModelId == modelId, cancellationToken);
+    public Task<Entry?> GetAsync(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default) =>
+        _db.Entries.FirstOrDefaultAsync(e => e.Id == entryId && e.TenantId == tenantId && e.BranchId == branchId && e.ContentModelId == modelId, cancellationToken);
 
-    public Task<List<Entry>> GetByModelAsync(Guid tenantId, Guid modelId, Guid? environmentId, string? locale, CancellationToken cancellationToken = default) =>
+    public Task<List<Entry>> GetByModelAsync(Guid tenantId, Guid branchId, Guid modelId, Guid? environmentId, string? locale, CancellationToken cancellationToken = default) =>
         _db.Entries
-            .Where(e => e.TenantId == tenantId && e.ContentModelId == modelId)
+            .Where(e => e.TenantId == tenantId && e.BranchId == branchId && e.ContentModelId == modelId)
             .Where(e => environmentId == null || e.EnvironmentId == environmentId)
             .Where(e => string.IsNullOrWhiteSpace(locale) || e.Locale == locale)
             .ToListAsync(cancellationToken);

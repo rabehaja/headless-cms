@@ -14,6 +14,7 @@ public class WebhookTests
             Name = "Hook",
             Url = "https://example.com",
             TenantId = Guid.NewGuid(),
+            BranchId = Guid.NewGuid(),
             Secret = "secret"
         };
 

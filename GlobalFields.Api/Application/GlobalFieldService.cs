@@ -12,13 +12,13 @@ public class GlobalFieldService
         _repository = repository;
     }
 
-    public Task<List<GlobalFieldDefinition>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        _repository.GetByTenantAsync(tenantId, cancellationToken);
+    public Task<List<GlobalFieldDefinition>> GetByBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default) =>
+        _repository.GetByBranchAsync(tenantId, branchId, cancellationToken);
 
-    public Task<GlobalFieldDefinition?> GetAsync(Guid tenantId, Guid fieldId, CancellationToken cancellationToken = default) =>
-        _repository.GetAsync(tenantId, fieldId, cancellationToken);
+    public Task<GlobalFieldDefinition?> GetAsync(Guid tenantId, Guid branchId, Guid fieldId, CancellationToken cancellationToken = default) =>
+        _repository.GetAsync(tenantId, branchId, fieldId, cancellationToken);
 
-    public async Task<GlobalFieldDefinition> CreateAsync(Guid tenantId, string key, string name, FieldType type, bool required, FieldSettings settings, CancellationToken cancellationToken = default)
+    public async Task<GlobalFieldDefinition> CreateAsync(Guid tenantId, Guid branchId, string key, string name, FieldType type, bool required, FieldSettings settings, CancellationToken cancellationToken = default)
     {
         if (!StandardFields.Types.Contains(type))
         {
@@ -32,7 +32,8 @@ public class GlobalFieldService
             Type = type,
             Required = required,
             Settings = settings,
-            TenantId = tenantId
+            TenantId = tenantId,
+            BranchId = branchId
         };
 
         await _repository.AddAsync(field, cancellationToken);
@@ -40,9 +41,9 @@ public class GlobalFieldService
         return field;
     }
 
-    public async Task<bool> UpdateAsync(Guid tenantId, Guid fieldId, string? key, string? name, FieldType? type, bool? required, FieldSettings? settings, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(Guid tenantId, Guid branchId, Guid fieldId, string? key, string? name, FieldType? type, bool? required, FieldSettings? settings, CancellationToken cancellationToken = default)
     {
-        var existing = await _repository.GetAsync(tenantId, fieldId, cancellationToken);
+        var existing = await _repository.GetAsync(tenantId, branchId, fieldId, cancellationToken);
         if (existing is null) return false;
 
         if (type is not null && !StandardFields.Types.Contains(type.Value))
@@ -60,9 +61,9 @@ public class GlobalFieldService
         return true;
     }
 
-    public async Task<bool> DeleteAsync(Guid tenantId, Guid fieldId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid branchId, Guid fieldId, CancellationToken cancellationToken = default)
     {
-        var existing = await _repository.GetAsync(tenantId, fieldId, cancellationToken);
+        var existing = await _repository.GetAsync(tenantId, branchId, fieldId, cancellationToken);
         if (existing is null) return false;
 
         await _repository.RemoveAsync(existing, cancellationToken);

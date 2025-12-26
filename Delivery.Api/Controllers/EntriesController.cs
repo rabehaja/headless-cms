@@ -7,7 +7,7 @@ namespace Delivery.Api.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("tenants/{tenantId:guid}/content-models/{modelId:guid}/entries")]
+[Route("tenants/{tenantId:guid}/branches/{branchId:guid}/content-models/{modelId:guid}/entries")]
 public class EntriesController : ControllerBase
 {
     private readonly DeliveryService _service;
@@ -18,27 +18,27 @@ public class EntriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<DeliveryEntry>>> GetEntries(Guid tenantId, Guid modelId, [FromQuery] Guid? environmentId, [FromQuery] string? locale, [FromQuery] bool preview = false)
+    public async Task<ActionResult<IEnumerable<DeliveryEntry>>> GetEntries(Guid tenantId, Guid branchId, Guid modelId, [FromQuery] Guid? environmentId, [FromQuery] string? locale, [FromQuery] bool preview = false)
     {
-        var entries = await _service.GetAsync(tenantId, modelId, environmentId, locale, preview);
+        var entries = await _service.GetAsync(tenantId, branchId, modelId, environmentId, locale, preview);
         Response.Headers.CacheControl = "public, max-age=60";
         return Ok(entries);
     }
 
     [HttpGet("{entryId:guid}")]
-    public async Task<ActionResult<DeliveryEntry>> GetEntry(Guid tenantId, Guid modelId, Guid entryId, [FromQuery] bool preview = false)
+    public async Task<ActionResult<DeliveryEntry>> GetEntry(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, [FromQuery] bool preview = false)
     {
-        var entry = await _service.GetOneAsync(tenantId, modelId, entryId, preview);
+        var entry = await _service.GetOneAsync(tenantId, branchId, modelId, entryId, preview);
         if (entry is null) return NotFound();
         Response.Headers.CacheControl = "public, max-age=120";
         return Ok(entry);
     }
 
     [HttpPost]
-    public async Task<ActionResult<DeliveryEntry>> CreateEntry(Guid tenantId, Guid modelId, [FromBody] CreateDeliveryEntryRequest request)
+    public async Task<ActionResult<DeliveryEntry>> CreateEntry(Guid tenantId, Guid branchId, Guid modelId, [FromBody] CreateDeliveryEntryRequest request)
     {
-        var entry = await _service.CreateAsync(tenantId, modelId, request.EnvironmentId, request.Locale ?? "en-us", request.Published, request.Data ?? new Dictionary<string, object?>(), request.TaxonomyIds);
-        return CreatedAtAction(nameof(GetEntry), new { tenantId, modelId, entryId = entry.Id }, entry);
+        var entry = await _service.CreateAsync(tenantId, branchId, modelId, request.EnvironmentId, request.Locale ?? "en-us", request.Published, request.Data ?? new Dictionary<string, object?>(), request.TaxonomyIds);
+        return CreatedAtAction(nameof(GetEntry), new { tenantId, branchId, modelId, entryId = entry.Id }, entry);
     }
 }
 

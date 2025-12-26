@@ -4,6 +4,7 @@ public class Entry
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid TenantId { get; set; }
+    public Guid BranchId { get; set; }
     public Guid ContentModelId { get; set; }
     public Guid EnvironmentId { get; set; }
     public string Locale { get; set; } = "en-us";

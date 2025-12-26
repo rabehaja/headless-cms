@@ -19,7 +19,7 @@ public class WebhookDispatcherTests
     public async Task Dispatcher_Queues_Targets_For_Event()
     {
         var repo = new Mock<IWebhookRepository>();
-        repo.Setup(r => r.GetByTenantAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        repo.Setup(r => r.GetByBranchAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<WebhookSubscription>
             {
                 new() { TenantId = Guid.NewGuid(), Url = "http://localhost", Events = new List<string>{ "entry.published" }, Secret = "secret" }
@@ -31,12 +31,12 @@ public class WebhookDispatcherTests
         var cts = new CancellationTokenSource();
         var runTask = dispatcher.StartAsync(cts.Token);
 
-        await queue.EnqueueAsync(new WebhookEvent(Guid.NewGuid(), "entry.published", new { id = 1 }), CancellationToken.None);
+        await queue.EnqueueAsync(new WebhookEvent(Guid.NewGuid(), Guid.NewGuid(), "entry.published", new { id = 1 }), CancellationToken.None);
         await Task.Delay(200);
         cts.Cancel();
         await Task.WhenAny(runTask, Task.Delay(500));
 
-        repo.Verify(r => r.GetByTenantAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+        repo.Verify(r => r.GetByBranchAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
     }
 
     private class HttpClientFactoryMock : IHttpClientFactory

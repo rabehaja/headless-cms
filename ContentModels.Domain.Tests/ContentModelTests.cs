@@ -29,9 +29,10 @@ public class ContentModelTests
     public void Tenant_AddContentModel_EnforcesUniqueName()
     {
         var tenant = new Tenant { Name = "Tenant" };
-        tenant.AddContentModel("Article", null, new List<FieldDefinition>(), new ContentModelSettings());
+        var branch = tenant.AddBranch("main");
+        branch.AddContentModel("Article", null, new List<FieldDefinition>(), new ContentModelSettings());
 
         Assert.Throws<InvalidOperationException>(() =>
-            tenant.AddContentModel("Article", null, new List<FieldDefinition>(), new ContentModelSettings()));
+            branch.AddContentModel("Article", null, new List<FieldDefinition>(), new ContentModelSettings()));
     }
 }

@@ -20,7 +20,7 @@ public class DeliveryServiceTests
         repo.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         var svc = new DeliveryService(repo.Object);
-        var entry = await svc.CreateAsync(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "en-us", true, new Dictionary<string, object?>(), new List<Guid> { Guid.NewGuid() });
+        var entry = await svc.CreateAsync(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "en-us", true, new Dictionary<string, object?>(), new List<Guid> { Guid.NewGuid() });
 
         Assert.True(entry.Published);
         Assert.NotNull(entry.PublishedAt);

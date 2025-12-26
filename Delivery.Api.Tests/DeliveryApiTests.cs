@@ -21,7 +21,7 @@ public class DeliveryApiTests : IClassFixture<DeliveryApiFactory>
     [Fact]
     public async Task DeliveryEndpoint_Requires_Key()
     {
-        var response = await _client.GetAsync("/tenants/00000000-0000-0000-0000-000000000000/content-models/00000000-0000-0000-0000-000000000000/entries");
+        var response = await _client.GetAsync("/tenants/00000000-0000-0000-0000-000000000000/branches/00000000-0000-0000-0000-000000000000/content-models/00000000-0000-0000-0000-000000000000/entries");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
@@ -29,7 +29,7 @@ public class DeliveryApiTests : IClassFixture<DeliveryApiFactory>
     public async Task DeliveryEndpoint_With_Key_Allows()
     {
         _client.DefaultRequestHeaders.Add("X-Delivery-Key", "delivery-key");
-        var response = await _client.GetAsync("/tenants/00000000-0000-0000-0000-000000000000/content-models/00000000-0000-0000-0000-000000000000/entries");
+        var response = await _client.GetAsync("/tenants/00000000-0000-0000-0000-000000000000/branches/00000000-0000-0000-0000-000000000000/content-models/00000000-0000-0000-0000-000000000000/entries");
         Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

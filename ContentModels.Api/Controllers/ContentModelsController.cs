@@ -7,7 +7,7 @@ namespace ContentModels.Api.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("organizations/{organizationId:guid}/tenants/{tenantId:guid}/content-models")]
+[Route("organizations/{organizationId:guid}/tenants/{tenantId:guid}/branches/{branchId:guid}/content-models")]
 public class ContentModelsController : ControllerBase
 {
     private readonly ContentModelService _contentModelService;
@@ -18,11 +18,11 @@ public class ContentModelsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ContentModel>>> GetModels(Guid organizationId, Guid tenantId)
+    public async Task<ActionResult<IEnumerable<ContentModel>>> GetModels(Guid organizationId, Guid tenantId, Guid branchId)
     {
         try
         {
-            var models = await _contentModelService.GetByTenantAsync(organizationId, tenantId);
+            var models = await _contentModelService.GetByBranchAsync(organizationId, tenantId, branchId);
             return Ok(models);
         }
         catch (InvalidOperationException)
@@ -32,14 +32,14 @@ public class ContentModelsController : ControllerBase
     }
 
     [HttpGet("{modelId:guid}")]
-    public async Task<ActionResult<ContentModel>> GetModel(Guid organizationId, Guid tenantId, Guid modelId)
+    public async Task<ActionResult<ContentModel>> GetModel(Guid organizationId, Guid tenantId, Guid branchId, Guid modelId)
     {
-        var model = await _contentModelService.GetAsync(organizationId, tenantId, modelId);
+        var model = await _contentModelService.GetAsync(organizationId, tenantId, branchId, modelId);
         return model is null ? NotFound() : Ok(model);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ContentModel>> CreateModel(Guid organizationId, Guid tenantId, [FromBody] CreateContentModelRequest request)
+    public async Task<ActionResult<ContentModel>> CreateModel(Guid organizationId, Guid tenantId, Guid branchId, [FromBody] CreateContentModelRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
         {
@@ -51,12 +51,13 @@ public class ContentModelsController : ControllerBase
             var model = await _contentModelService.CreateAsync(
                 organizationId,
                 tenantId,
+                branchId,
                 request.Name,
                 request.Description,
                 request.Fields ?? new List<FieldDefinition>(),
                 request.Settings ?? new ContentModelSettings());
 
-            return CreatedAtAction(nameof(GetModel), new { organizationId, tenantId, modelId = model.Id }, model);
+            return CreatedAtAction(nameof(GetModel), new { organizationId, tenantId, branchId, modelId = model.Id }, model);
         }
         catch (InvalidOperationException ex)
         {
@@ -69,13 +70,14 @@ public class ContentModelsController : ControllerBase
     }
 
     [HttpPut("{modelId:guid}")]
-    public async Task<ActionResult> UpdateModel(Guid organizationId, Guid tenantId, Guid modelId, [FromBody] UpdateContentModelRequest request)
+    public async Task<ActionResult> UpdateModel(Guid organizationId, Guid tenantId, Guid branchId, Guid modelId, [FromBody] UpdateContentModelRequest request)
     {
         try
         {
             var updated = await _contentModelService.UpdateAsync(
                 organizationId,
                 tenantId,
+                branchId,
                 modelId,
                 request.Name,
                 request.Description,
@@ -95,21 +97,21 @@ public class ContentModelsController : ControllerBase
     }
 
     [HttpPut("{modelId:guid}/settings")]
-    public async Task<ActionResult> UpdateSettings(Guid organizationId, Guid tenantId, Guid modelId, [FromBody] UpdateContentModelSettingsRequest request)
+    public async Task<ActionResult> UpdateSettings(Guid organizationId, Guid tenantId, Guid branchId, Guid modelId, [FromBody] UpdateContentModelSettingsRequest request)
     {
         if (request.Settings is null)
         {
             return BadRequest("Settings payload is required.");
         }
 
-        var updated = await _contentModelService.UpdateSettingsAsync(organizationId, tenantId, modelId, request.Settings);
+        var updated = await _contentModelService.UpdateSettingsAsync(organizationId, tenantId, branchId, modelId, request.Settings);
         return updated ? NoContent() : NotFound();
     }
 
     [HttpDelete("{modelId:guid}")]
-    public async Task<ActionResult> DeleteModel(Guid organizationId, Guid tenantId, Guid modelId)
+    public async Task<ActionResult> DeleteModel(Guid organizationId, Guid tenantId, Guid branchId, Guid modelId)
     {
-        var deleted = await _contentModelService.DeleteAsync(organizationId, tenantId, modelId);
+        var deleted = await _contentModelService.DeleteAsync(organizationId, tenantId, branchId, modelId);
         return deleted ? NoContent() : NotFound();
     }
 }

@@ -11,6 +11,8 @@ public class ContentModelsDbContext : DbContext
 
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<Stack> Stacks => Set<Stack>();
+    public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<ContentModel> ContentModels => Set<ContentModel>();
     public DbSet<FieldDefinition> FieldDefinitions => Set<FieldDefinition>();
 
@@ -22,10 +24,28 @@ public class ContentModelsDbContext : DbContext
             .HasForeignKey(t => t.OrganizationId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<Tenant>()
-            .HasMany(t => t.ContentModels)
+        modelBuilder.Entity<Organization>()
+            .HasMany(o => o.Stacks)
             .WithOne()
-            .HasForeignKey(c => c.TenantId)
+            .HasForeignKey(s => s.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Stack>()
+            .HasMany(s => s.Tenants)
+            .WithOne()
+            .HasForeignKey(t => t.StackId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Tenant>()
+            .HasMany(t => t.Branches)
+            .WithOne()
+            .HasForeignKey(b => b.TenantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Branch>()
+            .HasMany(b => b.ContentModels)
+            .WithOne()
+            .HasForeignKey(c => c.BranchId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ContentModel>()

@@ -20,7 +20,7 @@ public class EntryServiceTests
         repo.Setup(r => r.AddAsync(It.IsAny<Entry>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         var svc = new EntryService(repo.Object);
-        var entry = await svc.CreateAsync(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "en-us", new Dictionary<string, object?>(), true, null, new List<Guid> { Guid.NewGuid() });
+        var entry = await svc.CreateAsync(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "en-us", new Dictionary<string, object?>(), true, null, new List<Guid> { Guid.NewGuid() });
 
         Assert.True(entry.Published);
         Assert.Equal(EntryState.Published, entry.State);
@@ -32,12 +32,12 @@ public class EntryServiceTests
     {
         var entry = new Entry { Published = true, State = EntryState.Published };
         var repo = new Mock<IEntryRepository>();
-        repo.Setup(r => r.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        repo.Setup(r => r.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(entry);
         repo.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         var svc = new EntryService(repo.Object);
-        var updated = await svc.UpdateAsync(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, object?>(), false, null, null, null);
+        var updated = await svc.UpdateAsync(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new Dictionary<string, object?>(), false, null, null, null);
         Assert.True(updated);
         Assert.False(entry.Published);
         Assert.Equal(EntryState.Unpublished, entry.State);

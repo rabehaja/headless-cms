@@ -2,7 +2,7 @@ using System.Threading.Channels;
 
 namespace Webhooks.Api.Services;
 
-public record WebhookEvent(Guid TenantId, string Event, object? Payload);
+public record WebhookEvent(Guid TenantId, Guid BranchId, string Event, object? Payload);
 
 public class WebhookQueue
 {

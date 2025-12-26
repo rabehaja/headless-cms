@@ -13,11 +13,11 @@ public class WebhookRepository : IWebhookRepository
         _db = db;
     }
 
-    public Task<WebhookSubscription?> GetAsync(Guid tenantId, Guid id, CancellationToken cancellationToken = default) =>
-        _db.Webhooks.FirstOrDefaultAsync(w => w.Id == id && w.TenantId == tenantId, cancellationToken);
+    public Task<WebhookSubscription?> GetAsync(Guid tenantId, Guid branchId, Guid id, CancellationToken cancellationToken = default) =>
+        _db.Webhooks.FirstOrDefaultAsync(w => w.Id == id && w.TenantId == tenantId && w.BranchId == branchId, cancellationToken);
 
-    public Task<List<WebhookSubscription>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        _db.Webhooks.Where(w => w.TenantId == tenantId).ToListAsync(cancellationToken);
+    public Task<List<WebhookSubscription>> GetByBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default) =>
+        _db.Webhooks.Where(w => w.TenantId == tenantId && w.BranchId == branchId).ToListAsync(cancellationToken);
 
     public async Task AddAsync(WebhookSubscription webhook, CancellationToken cancellationToken = default)
     {

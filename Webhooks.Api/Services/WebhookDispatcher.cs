@@ -25,7 +25,7 @@ public class WebhookDispatcher : BackgroundService
     {
         await foreach (var item in _queue.ReadAllAsync(stoppingToken))
         {
-            var subs = await _repository.GetByTenantAsync(item.TenantId, stoppingToken);
+            var subs = await _repository.GetByBranchAsync(item.TenantId, item.BranchId, stoppingToken);
             var targets = subs.Where(s => s.Active && s.Events.Contains(item.Event, StringComparer.OrdinalIgnoreCase)).ToList();
 
             foreach (var sub in targets)

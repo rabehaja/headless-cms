@@ -12,17 +12,18 @@ public class EntryService
         _repository = repository;
     }
 
-    public Task<List<Entry>> GetAsync(Guid tenantId, Guid modelId, Guid? environmentId, string? locale, CancellationToken cancellationToken = default) =>
-        _repository.GetByModelAsync(tenantId, modelId, environmentId, locale, cancellationToken);
+    public Task<List<Entry>> GetAsync(Guid tenantId, Guid branchId, Guid modelId, Guid? environmentId, string? locale, CancellationToken cancellationToken = default) =>
+        _repository.GetByModelAsync(tenantId, branchId, modelId, environmentId, locale, cancellationToken);
 
-    public Task<Entry?> GetOneAsync(Guid tenantId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default) =>
-        _repository.GetAsync(tenantId, modelId, entryId, cancellationToken);
+    public Task<Entry?> GetOneAsync(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default) =>
+        _repository.GetAsync(tenantId, branchId, modelId, entryId, cancellationToken);
 
-    public async Task<Entry> CreateAsync(Guid tenantId, Guid modelId, Guid environmentId, string locale, Dictionary<string, object?> data, bool published, DateTime? publishAt, List<Guid>? taxonomyIds, CancellationToken cancellationToken = default)
+    public async Task<Entry> CreateAsync(Guid tenantId, Guid branchId, Guid modelId, Guid environmentId, string locale, Dictionary<string, object?> data, bool published, DateTime? publishAt, List<Guid>? taxonomyIds, CancellationToken cancellationToken = default)
     {
         var entry = new Entry
         {
             TenantId = tenantId,
+            BranchId = branchId,
             ContentModelId = modelId,
             EnvironmentId = environmentId,
             Locale = string.IsNullOrWhiteSpace(locale) ? "en-us" : locale,
@@ -40,9 +41,9 @@ public class EntryService
         return entry;
     }
 
-    public async Task<bool> UpdateAsync(Guid tenantId, Guid modelId, Guid entryId, Dictionary<string, object?> data, bool? published, Guid? environmentId, string? locale, List<Guid>? taxonomyIds, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, Dictionary<string, object?> data, bool? published, Guid? environmentId, string? locale, List<Guid>? taxonomyIds, CancellationToken cancellationToken = default)
     {
-        var entry = await _repository.GetAsync(tenantId, modelId, entryId, cancellationToken);
+        var entry = await _repository.GetAsync(tenantId, branchId, modelId, entryId, cancellationToken);
         if (entry is null) return false;
 
         entry.Data = data;
@@ -62,9 +63,9 @@ public class EntryService
         return true;
     }
 
-    public async Task<bool> SchedulePublishAsync(Guid tenantId, Guid modelId, Guid entryId, DateTime publishAt, DateTime? unpublishAt, CancellationToken cancellationToken = default)
+    public async Task<bool> SchedulePublishAsync(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, DateTime publishAt, DateTime? unpublishAt, CancellationToken cancellationToken = default)
     {
-        var entry = await _repository.GetAsync(tenantId, modelId, entryId, cancellationToken);
+        var entry = await _repository.GetAsync(tenantId, branchId, modelId, entryId, cancellationToken);
         if (entry is null) return false;
 
         entry.ScheduledPublishAt = publishAt;
@@ -75,9 +76,9 @@ public class EntryService
         return true;
     }
 
-    public async Task<bool> PublishAsync(Guid tenantId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default)
+    public async Task<bool> PublishAsync(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default)
     {
-        var entry = await _repository.GetAsync(tenantId, modelId, entryId, cancellationToken);
+        var entry = await _repository.GetAsync(tenantId, branchId, modelId, entryId, cancellationToken);
         if (entry is null) return false;
 
         entry.State = EntryState.Published;
@@ -90,9 +91,9 @@ public class EntryService
         return true;
     }
 
-    public async Task<bool> UnpublishAsync(Guid tenantId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default)
+    public async Task<bool> UnpublishAsync(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default)
     {
-        var entry = await _repository.GetAsync(tenantId, modelId, entryId, cancellationToken);
+        var entry = await _repository.GetAsync(tenantId, branchId, modelId, entryId, cancellationToken);
         if (entry is null) return false;
 
         entry.State = EntryState.Unpublished;
@@ -102,9 +103,9 @@ public class EntryService
         return true;
     }
 
-    public async Task<bool> DeleteAsync(Guid tenantId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, CancellationToken cancellationToken = default)
     {
-        var entry = await _repository.GetAsync(tenantId, modelId, entryId, cancellationToken);
+        var entry = await _repository.GetAsync(tenantId, branchId, modelId, entryId, cancellationToken);
         if (entry is null) return false;
         await _repository.RemoveAsync(entry, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);

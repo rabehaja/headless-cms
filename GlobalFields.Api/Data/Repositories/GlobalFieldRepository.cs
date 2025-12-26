@@ -13,11 +13,11 @@ public class GlobalFieldRepository : IGlobalFieldRepository
         _db = db;
     }
 
-    public Task<GlobalFieldDefinition?> GetAsync(Guid tenantId, Guid fieldId, CancellationToken cancellationToken = default) =>
-        _db.GlobalFields.FirstOrDefaultAsync(f => f.Id == fieldId && f.TenantId == tenantId, cancellationToken);
+    public Task<GlobalFieldDefinition?> GetAsync(Guid tenantId, Guid branchId, Guid fieldId, CancellationToken cancellationToken = default) =>
+        _db.GlobalFields.FirstOrDefaultAsync(f => f.Id == fieldId && f.TenantId == tenantId && f.BranchId == branchId, cancellationToken);
 
-    public Task<List<GlobalFieldDefinition>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        _db.GlobalFields.Where(f => f.TenantId == tenantId).ToListAsync(cancellationToken);
+    public Task<List<GlobalFieldDefinition>> GetByBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default) =>
+        _db.GlobalFields.Where(f => f.TenantId == tenantId && f.BranchId == branchId).ToListAsync(cancellationToken);
 
     public async Task AddAsync(GlobalFieldDefinition field, CancellationToken cancellationToken = default)
     {

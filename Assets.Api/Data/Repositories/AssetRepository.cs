@@ -13,11 +13,11 @@ public class AssetRepository : IAssetRepository
         _db = db;
     }
 
-    public Task<Asset?> GetAsync(Guid tenantId, Guid assetId, CancellationToken cancellationToken = default) =>
-        _db.Assets.FirstOrDefaultAsync(a => a.Id == assetId && a.TenantId == tenantId, cancellationToken);
+    public Task<Asset?> GetAsync(Guid tenantId, Guid branchId, Guid assetId, CancellationToken cancellationToken = default) =>
+        _db.Assets.FirstOrDefaultAsync(a => a.Id == assetId && a.TenantId == tenantId && a.BranchId == branchId, cancellationToken);
 
-    public Task<List<Asset>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        _db.Assets.Where(a => a.TenantId == tenantId).ToListAsync(cancellationToken);
+    public Task<List<Asset>> GetByBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default) =>
+        _db.Assets.Where(a => a.TenantId == tenantId && a.BranchId == branchId).ToListAsync(cancellationToken);
 
     public async Task AddAsync(Asset asset, CancellationToken cancellationToken = default)
     {

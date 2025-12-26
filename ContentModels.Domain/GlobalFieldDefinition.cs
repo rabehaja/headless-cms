@@ -6,6 +6,7 @@ public class GlobalFieldDefinition
     public string Key { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public Guid TenantId { get; set; }
+    public Guid BranchId { get; set; }
     public FieldType Type { get; set; }
     public bool Required { get; set; }
     public FieldSettings Settings { get; set; } = new();

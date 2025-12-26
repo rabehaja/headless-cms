@@ -21,7 +21,7 @@ public class EntriesApiTests : IClassFixture<EntriesApiFactory>
     [Fact]
     public async Task GetEntries_ReturnsUnauthorizedWithoutAuth()
     {
-        var response = await _client.GetAsync("/organizations/00000000-0000-0000-0000-000000000000/tenants/00000000-0000-0000-0000-000000000000/content-models/00000000-0000-0000-0000-000000000000/entries");
+        var response = await _client.GetAsync("/organizations/00000000-0000-0000-0000-000000000000/tenants/00000000-0000-0000-0000-000000000000/branches/00000000-0000-0000-0000-000000000000/content-models/00000000-0000-0000-0000-000000000000/entries");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

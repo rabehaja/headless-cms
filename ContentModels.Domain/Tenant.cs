@@ -5,34 +5,23 @@ public class Tenant
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
     public Guid OrganizationId { get; set; }
-    public List<ContentModel> ContentModels { get; set; } = new();
+    public Guid? StackId { get; set; }
+    public List<Branch> Branches { get; set; } = new();
 
-    public ContentModel AddContentModel(string name, string? description, List<FieldDefinition> fields, ContentModelSettings settings)
+    public Branch AddBranch(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Content model name is required.", nameof(name));
+            throw new ArgumentException("Branch name is required.", nameof(name));
         }
 
-        if (ContentModels.Any(m => string.Equals(m.Name, name.Trim(), StringComparison.OrdinalIgnoreCase)))
+        if (Branches.Any(b => string.Equals(b.Name, name.Trim(), StringComparison.OrdinalIgnoreCase)))
         {
-            throw new InvalidOperationException($"Content model with name '{name}' already exists in this tenant.");
+            throw new InvalidOperationException($"Branch with name '{name}' already exists in this tenant.");
         }
 
-        var model = new ContentModel
-        {
-            Name = name.Trim(),
-            Description = description,
-            TenantId = Id,
-            Settings = settings
-        };
-
-        foreach (var field in fields)
-        {
-            model.AddField(field);
-        }
-
-        ContentModels.Add(model);
-        return model;
+        var branch = new Branch { Name = name.Trim(), TenantId = Id };
+        Branches.Add(branch);
+        return branch;
     }
 }

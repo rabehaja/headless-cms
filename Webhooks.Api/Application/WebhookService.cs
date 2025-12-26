@@ -12,17 +12,18 @@ public class WebhookService
         _repo = repo;
     }
 
-    public Task<List<WebhookSubscription>> GetAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        _repo.GetByTenantAsync(tenantId, cancellationToken);
+    public Task<List<WebhookSubscription>> GetAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default) =>
+        _repo.GetByBranchAsync(tenantId, branchId, cancellationToken);
 
-    public Task<WebhookSubscription?> GetOneAsync(Guid tenantId, Guid id, CancellationToken cancellationToken = default) =>
-        _repo.GetAsync(tenantId, id, cancellationToken);
+    public Task<WebhookSubscription?> GetOneAsync(Guid tenantId, Guid branchId, Guid id, CancellationToken cancellationToken = default) =>
+        _repo.GetAsync(tenantId, branchId, id, cancellationToken);
 
-    public async Task<WebhookSubscription> CreateAsync(Guid tenantId, string name, string url, List<string> events, bool active, string secret, int maxRetries, CancellationToken cancellationToken = default)
+    public async Task<WebhookSubscription> CreateAsync(Guid tenantId, Guid branchId, string name, string url, List<string> events, bool active, string secret, int maxRetries, CancellationToken cancellationToken = default)
     {
         var webhook = new WebhookSubscription
         {
             TenantId = tenantId,
+            BranchId = branchId,
             Name = name.Trim(),
             Url = url.Trim(),
             Events = events,
@@ -36,9 +37,9 @@ public class WebhookService
         return webhook;
     }
 
-    public async Task<bool> UpdateAsync(Guid tenantId, Guid id, string? name, string? url, List<string>? events, bool? active, string? secret, int? maxRetries, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(Guid tenantId, Guid branchId, Guid id, string? name, string? url, List<string>? events, bool? active, string? secret, int? maxRetries, CancellationToken cancellationToken = default)
     {
-        var webhook = await _repo.GetAsync(tenantId, id, cancellationToken);
+        var webhook = await _repo.GetAsync(tenantId, branchId, id, cancellationToken);
         if (webhook is null) return false;
 
         if (!string.IsNullOrWhiteSpace(name)) webhook.Name = name.Trim();
@@ -52,9 +53,9 @@ public class WebhookService
         return true;
     }
 
-    public async Task<bool> DeleteAsync(Guid tenantId, Guid id, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid branchId, Guid id, CancellationToken cancellationToken = default)
     {
-        var webhook = await _repo.GetAsync(tenantId, id, cancellationToken);
+        var webhook = await _repo.GetAsync(tenantId, branchId, id, cancellationToken);
         if (webhook is null) return false;
 
         await _repo.RemoveAsync(webhook, cancellationToken);

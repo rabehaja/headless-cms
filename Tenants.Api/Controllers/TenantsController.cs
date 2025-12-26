@@ -39,14 +39,14 @@ public class TenantsController : ControllerBase
 
         try
         {
-            var tenant = await _tenantService.CreateAsync(organizationId, request.Name);
+            var tenant = await _tenantService.CreateAsync(organizationId, request.Name, request.StackId);
             return CreatedAtAction(nameof(GetTenant), new { organizationId, tenantId = tenant.Id }, tenant);
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex)
         {
-            return NotFound($"Organization {organizationId} not found.");
+            return NotFound(ex.Message);
         }
     }
 }
 
-public record CreateTenantRequest(string Name);
+public record CreateTenantRequest(string Name, Guid? StackId);

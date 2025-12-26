@@ -13,15 +13,15 @@ public class DeliveryEntryRepository : IDeliveryEntryRepository
         _db = db;
     }
 
-    public Task<DeliveryEntry?> GetAsync(Guid tenantId, Guid modelId, Guid entryId, bool includeUnpublished, CancellationToken cancellationToken = default) =>
+    public Task<DeliveryEntry?> GetAsync(Guid tenantId, Guid branchId, Guid modelId, Guid entryId, bool includeUnpublished, CancellationToken cancellationToken = default) =>
         _db.Entries
-            .Where(e => e.TenantId == tenantId && e.ContentModelId == modelId && e.Id == entryId)
+            .Where(e => e.TenantId == tenantId && e.BranchId == branchId && e.ContentModelId == modelId && e.Id == entryId)
             .Where(e => includeUnpublished || e.Published)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public Task<List<DeliveryEntry>> GetByModelAsync(Guid tenantId, Guid modelId, Guid? environmentId, string? locale, bool includeUnpublished, CancellationToken cancellationToken = default) =>
+    public Task<List<DeliveryEntry>> GetByModelAsync(Guid tenantId, Guid branchId, Guid modelId, Guid? environmentId, string? locale, bool includeUnpublished, CancellationToken cancellationToken = default) =>
         _db.Entries
-            .Where(e => e.TenantId == tenantId && e.ContentModelId == modelId)
+            .Where(e => e.TenantId == tenantId && e.BranchId == branchId && e.ContentModelId == modelId)
             .Where(e => includeUnpublished || e.Published)
             .Where(e => environmentId == null || e.EnvironmentId == environmentId)
             .Where(e => string.IsNullOrWhiteSpace(locale) || e.Locale == locale)
