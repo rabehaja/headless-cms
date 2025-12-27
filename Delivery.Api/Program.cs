@@ -29,6 +29,9 @@ builder.Services.AddDbContext<DeliveryDbContext>(options =>
 });
 builder.Services.AddScoped<DeliveryService>();
 builder.Services.AddScoped<IDeliveryEntryRepository, DeliveryEntryRepository>();
+builder.Services.AddGraphQLServer()
+    .AddQueryType<Delivery.Api.GraphQL.Query>()
+    .ModifyRequestOptions(o => o.IncludeExceptionDetails = true);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -57,6 +60,7 @@ app.UseMiddleware<DeliveryApiKeyMiddleware>();
 app.UseMiddleware<ETagMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
+app.MapGraphQL("/graphql");
 app.Run();
 
 public partial class Program;
