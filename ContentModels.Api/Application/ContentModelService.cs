@@ -8,12 +8,14 @@ public class ContentModelService
     private readonly ITenantRepository _tenantRepository;
     private readonly IContentModelRepository _contentModelRepository;
     private readonly IBranchRepository _branchRepository;
+    private readonly IAuditLogger _audit;
 
-    public ContentModelService(ITenantRepository tenantRepository, IContentModelRepository contentModelRepository, IBranchRepository branchRepository)
+    public ContentModelService(ITenantRepository tenantRepository, IContentModelRepository contentModelRepository, IBranchRepository branchRepository, IAuditLogger audit)
     {
         _tenantRepository = tenantRepository;
         _contentModelRepository = contentModelRepository;
         _branchRepository = branchRepository;
+        _audit = audit;
     }
 
     public async Task<List<ContentModel>> GetByBranchAsync(Guid stackId, Guid tenantId, Guid branchId, bool inherit = false, CancellationToken cancellationToken = default)
@@ -83,6 +85,7 @@ public class ContentModelService
 
         await _contentModelRepository.AddAsync(model, cancellationToken);
         await _contentModelRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("contentModel.create", nameof(ContentModel), model.Id, null, tenantId, branchId, new { name = model.Name }, cancellationToken);
         return model;
     }
 
@@ -126,6 +129,7 @@ public class ContentModelService
         model.Version += 1;
         model.UpdatedAt = DateTime.UtcNow;
         await _contentModelRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("contentModel.update", nameof(ContentModel), model.Id, null, tenantId, branchId, new { name = model.Name }, cancellationToken);
         return true;
     }
 
@@ -140,6 +144,7 @@ public class ContentModelService
         model.Version += 1;
         model.UpdatedAt = DateTime.UtcNow;
         await _contentModelRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("contentModel.updateSettings", nameof(ContentModel), model.Id, null, tenantId, branchId, null, cancellationToken);
         return true;
     }
 
@@ -152,6 +157,7 @@ public class ContentModelService
 
         await _contentModelRepository.RemoveAsync(model, cancellationToken);
         await _contentModelRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("contentModel.delete", nameof(ContentModel), model.Id, null, tenantId, branchId, null, cancellationToken);
         return true;
     }
 
@@ -216,6 +222,7 @@ public class ContentModelService
         }
 
         await _contentModelRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("contentModel.merge", nameof(ContentModel), null, null, tenantId, targetBranchId, new { sourceBranchId, targetBranchId, added = preview.Adds.Count, updated = preview.Updates.Count }, cancellationToken);
         return true;
     }
 

@@ -13,6 +13,7 @@ public class TenantsDbContext : DbContext
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<Stack> Stacks => Set<Stack>();
+    public DbSet<AuditLogEntry> AuditLogs => Set<AuditLogEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,5 +42,9 @@ public class TenantsDbContext : DbContext
             .WithOne()
             .HasForeignKey(t => t.StackId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<AuditLogEntry>()
+            .Property(a => a.Metadata)
+            .HasColumnType("jsonb");
     }
 }

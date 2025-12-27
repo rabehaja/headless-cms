@@ -17,6 +17,9 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 });
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IAuditLogger, AuditLogger>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<TokenService>();
 
 var app = builder.Build();

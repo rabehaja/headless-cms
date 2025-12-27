@@ -7,11 +7,13 @@ public class BranchService
 {
     private readonly ITenantRepository _tenantRepository;
     private readonly IBranchRepository _branchRepository;
+    private readonly IAuditLogger _audit;
 
-    public BranchService(ITenantRepository tenantRepository, IBranchRepository branchRepository)
+    public BranchService(ITenantRepository tenantRepository, IBranchRepository branchRepository, IAuditLogger audit)
     {
         _tenantRepository = tenantRepository;
         _branchRepository = branchRepository;
+        _audit = audit;
     }
 
     public async Task<List<Branch>> GetByTenantAsync(Guid stackId, Guid tenantId, CancellationToken cancellationToken = default)
@@ -58,6 +60,7 @@ public class BranchService
         };
         await _branchRepository.AddAsync(branch, cancellationToken);
         await _branchRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("branch.create", nameof(Branch), branch.Id, stackId, tenantId, branch.Id, new { name, isDefault, parentBranchId }, cancellationToken);
         return branch;
     }
 }

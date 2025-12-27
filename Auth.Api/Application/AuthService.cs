@@ -8,10 +8,12 @@ namespace Auth.Api.Application;
 public class AuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IAuditLogger _audit;
 
-    public AuthService(IUserRepository userRepository)
+    public AuthService(IUserRepository userRepository, IAuditLogger audit)
     {
         _userRepository = userRepository;
+        _audit = audit;
     }
 
     public async Task<UserAccount> RegisterAsync(string email, string password, string role, Guid? tenantId, CancellationToken cancellationToken = default)
@@ -32,6 +34,7 @@ public class AuthService
 
         await _userRepository.AddAsync(user, cancellationToken);
         await _userRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("auth.register", nameof(UserAccount), user.Id, new { email = user.Email, tenantId });
         return user;
     }
 
@@ -46,6 +49,7 @@ public class AuthService
             return null;
         }
 
+        await _audit.AppendAsync("auth.login", nameof(UserAccount), user.Id, new { email = user.Email, tenantId = user.TenantId });
         return user;
     }
 

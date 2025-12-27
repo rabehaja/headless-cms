@@ -34,16 +34,16 @@ public class ElasticIndexer
             .Index(_client.IndexName)
             .Query(q => q.Bool(b =>
             {
-                b.Must(m => m.Term(t => t.Field("tenantId").Value(tenantId.ToString())));
+                b.Must(m => m.Term(t => t.Field(new Field("tenantId")).Value(tenantId.ToString())));
 
                 if (!string.IsNullOrWhiteSpace(locale))
                 {
-                    b.Must(m => m.Term(t => t.Field("locale").Value(locale)));
+                    b.Must(m => m.Term(t => t.Field(new Field("locale")).Value(locale)));
                 }
 
                 if (contentModelId is not null)
                 {
-                    b.Must(m => m.Term(t => t.Field("contentModelId").Value(contentModelId.Value.ToString())));
+                    b.Must(m => m.Term(t => t.Field(new Field("contentModelId")).Value(contentModelId.Value.ToString())));
                 }
 
                 if (terms.Length > 0)

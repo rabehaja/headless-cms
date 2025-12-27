@@ -7,11 +7,13 @@ public class TenantService
 {
     private readonly ITenantRepository _tenantRepository;
     private readonly IStackRepository _stackRepository;
+    private readonly IAuditLogger _audit;
 
-    public TenantService(ITenantRepository tenantRepository, IStackRepository stackRepository)
+    public TenantService(ITenantRepository tenantRepository, IStackRepository stackRepository, IAuditLogger audit)
     {
         _tenantRepository = tenantRepository;
         _stackRepository = stackRepository;
+        _audit = audit;
     }
 
     public Task<List<Tenant>> GetByStackAsync(Guid stackId, CancellationToken cancellationToken = default) =>
@@ -28,6 +30,7 @@ public class TenantService
         var tenant = stack.AddTenant(name);
         await _tenantRepository.AddAsync(tenant, cancellationToken);
         await _tenantRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("tenant.create", nameof(Tenant), tenant.Id, stackId, tenant.Id, null, new { name }, cancellationToken);
         return tenant;
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Auth.Api.Application;
 using ContentModels.Domain;
 using ContentModels.Domain.Repositories;
+using Moq;
 using Xunit;
 
 namespace Auth.Api.Tests;
@@ -33,7 +34,8 @@ public class AuthServiceTests
     public async Task Register_Then_Validate_Succeeds()
     {
         var repo = new InMemoryUserRepo();
-        var svc = new AuthService(repo);
+        var audit = new Mock<IAuditLogger>();
+        var svc = new AuthService(repo, audit.Object);
 
         var user = await svc.RegisterAsync("test@example.com", "password", "editor", null);
         Assert.Equal("editor", user.Role);
@@ -47,7 +49,8 @@ public class AuthServiceTests
     public async Task Validate_Fails_With_WrongPassword()
     {
         var repo = new InMemoryUserRepo();
-        var svc = new AuthService(repo);
+        var audit = new Mock<IAuditLogger>();
+        var svc = new AuthService(repo, audit.Object);
         await svc.RegisterAsync("test@example.com", "password", "editor", null);
 
         var validated = await svc.ValidateAsync("test@example.com", "wrong");

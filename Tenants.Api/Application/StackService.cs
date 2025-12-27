@@ -7,11 +7,13 @@ public class StackService
 {
     private readonly IStackRepository _stackRepository;
     private readonly IOrganizationRepository _organizationRepository;
+    private readonly IAuditLogger _audit;
 
-    public StackService(IStackRepository stackRepository, IOrganizationRepository organizationRepository)
+    public StackService(IStackRepository stackRepository, IOrganizationRepository organizationRepository, IAuditLogger audit)
     {
         _stackRepository = stackRepository;
         _organizationRepository = organizationRepository;
+        _audit = audit;
     }
 
     public Task<List<Stack>> GetAllAsync(CancellationToken cancellationToken = default) =>
@@ -39,6 +41,7 @@ public class StackService
         var stack = new Stack { Name = name.Trim(), OrganizationId = organizationId };
         await _stackRepository.AddAsync(stack, cancellationToken);
         await _stackRepository.SaveChangesAsync(cancellationToken);
+        await _audit.AppendAsync("stack.create", nameof(Stack), stack.Id, stack.Id, null, null, new { name, organizationId }, cancellationToken);
         return stack;
     }
 }

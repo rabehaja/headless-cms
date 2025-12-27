@@ -15,6 +15,7 @@ public class ContentModelsDbContext : DbContext
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<ContentModel> ContentModels => Set<ContentModel>();
     public DbSet<FieldDefinition> FieldDefinitions => Set<FieldDefinition>();
+    public DbSet<AuditLogEntry> AuditLogs => Set<AuditLogEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -69,5 +70,9 @@ public class ContentModelsDbContext : DbContext
                 settings.Property(s => s.EnableVersioning);
                 settings.Property(s => s.Additional).HasColumnType("jsonb");
             });
+
+        modelBuilder.Entity<AuditLogEntry>()
+            .Property(a => a.Metadata)
+            .HasColumnType("jsonb");
     }
 }

@@ -10,4 +10,12 @@ public class AuthDbContext : DbContext
     }
 
     public DbSet<UserAccount> Users => Set<UserAccount>();
+    public DbSet<AuditLogEntry> AuditLogs => Set<AuditLogEntry>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AuditLogEntry>()
+            .Property(a => a.Metadata)
+            .HasColumnType("jsonb");
+    }
 }
