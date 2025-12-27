@@ -15,7 +15,7 @@ public class Stack
         }
 
         var tenant = new Tenant { Name = name.Trim(), OrganizationId = OrganizationId, StackId = Id };
-        tenant.AddBranch("main");
+        tenant.AddBranch("main", true);
         Tenants.Add(tenant);
         return tenant;
     }

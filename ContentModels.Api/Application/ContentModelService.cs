@@ -7,31 +7,62 @@ public class ContentModelService
 {
     private readonly ITenantRepository _tenantRepository;
     private readonly IContentModelRepository _contentModelRepository;
+    private readonly IBranchRepository _branchRepository;
 
-    public ContentModelService(ITenantRepository tenantRepository, IContentModelRepository contentModelRepository)
+    public ContentModelService(ITenantRepository tenantRepository, IContentModelRepository contentModelRepository, IBranchRepository branchRepository)
     {
         _tenantRepository = tenantRepository;
         _contentModelRepository = contentModelRepository;
+        _branchRepository = branchRepository;
     }
 
-    public async Task<List<ContentModel>> GetByBranchAsync(Guid stackId, Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+    public async Task<List<ContentModel>> GetByBranchAsync(Guid stackId, Guid tenantId, Guid branchId, bool inherit = false, CancellationToken cancellationToken = default)
     {
         var exists = await _tenantRepository.ExistsAsync(tenantId, stackId, cancellationToken);
         if (!exists) throw new InvalidOperationException("Tenant not found.");
-        return await _contentModelRepository.GetByBranchAsync(tenantId, branchId, cancellationToken);
+        if (!inherit)
+        {
+            return await _contentModelRepository.GetByBranchAsync(tenantId, branchId, cancellationToken);
+        }
+
+        var branchChain = await BuildBranchChainAsync(tenantId, branchId, cancellationToken);
+        var merged = new Dictionary<Guid, ContentModel>();
+        foreach (var b in branchChain)
+        {
+            var models = await _contentModelRepository.GetByBranchAsync(tenantId, b.Id, cancellationToken);
+            foreach (var model in models)
+            {
+                merged[model.Id] = model;
+            }
+        }
+
+        return merged.Values.ToList();
     }
 
-    public async Task<ContentModel?> GetAsync(Guid stackId, Guid tenantId, Guid branchId, Guid modelId, CancellationToken cancellationToken = default)
+    public async Task<ContentModel?> GetAsync(Guid stackId, Guid tenantId, Guid branchId, Guid modelId, bool inherit = false, CancellationToken cancellationToken = default)
     {
         var exists = await _tenantRepository.ExistsAsync(tenantId, stackId, cancellationToken);
         if (!exists) return null;
-        return await _contentModelRepository.GetAsync(tenantId, branchId, modelId, cancellationToken);
+        if (!inherit)
+        {
+            return await _contentModelRepository.GetAsync(tenantId, branchId, modelId, cancellationToken);
+        }
+
+        var branchChain = await BuildBranchChainAsync(tenantId, branchId, cancellationToken);
+        foreach (var b in branchChain)
+        {
+            var model = await _contentModelRepository.GetAsync(tenantId, b.Id, modelId, cancellationToken);
+            if (model is not null) return model;
+        }
+
+        return null;
     }
 
     public async Task<ContentModel> CreateAsync(Guid stackId, Guid tenantId, Guid branchId, string name, string? description, List<FieldDefinition> fields, ContentModelSettings settings, CancellationToken cancellationToken = default)
     {
         var tenant = await _tenantRepository.GetAsync(tenantId, stackId, cancellationToken);
         if (tenant is null) throw new InvalidOperationException("Tenant not found.");
+        await EnsureBranchWritable(tenantId, branchId, cancellationToken);
 
         if (await _contentModelRepository.ExistsByNameAsync(tenantId, branchId, name.Trim(), cancellationToken))
         {
@@ -64,6 +95,7 @@ public class ContentModelService
         {
             return false;
         }
+        await EnsureBranchWritable(tenantId, branchId, cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -102,6 +134,7 @@ public class ContentModelService
         var model = await _contentModelRepository.GetAsync(tenantId, branchId, modelId, cancellationToken);
         if (model is null) return false;
         if (!await _tenantRepository.ExistsAsync(tenantId, stackId, cancellationToken)) return false;
+        await EnsureBranchWritable(tenantId, branchId, cancellationToken);
 
         model.Settings = settings;
         model.Version += 1;
@@ -115,6 +148,7 @@ public class ContentModelService
         var model = await _contentModelRepository.GetAsync(tenantId, branchId, modelId, cancellationToken);
         if (model is null) return false;
         if (!await _tenantRepository.ExistsAsync(tenantId, stackId, cancellationToken)) return false;
+        await EnsureBranchWritable(tenantId, branchId, cancellationToken);
 
         await _contentModelRepository.RemoveAsync(model, cancellationToken);
         await _contentModelRepository.SaveChangesAsync(cancellationToken);
@@ -127,6 +161,7 @@ public class ContentModelService
         {
             throw new InvalidOperationException("Tenant not found.");
         }
+        await EnsureNotDefault(tenantId, targetBranchId, cancellationToken);
 
         var source = await _contentModelRepository.GetByBranchAsync(tenantId, sourceBranchId, cancellationToken);
         var target = await _contentModelRepository.GetByBranchAsync(tenantId, targetBranchId, cancellationToken);
@@ -203,16 +238,49 @@ public class ContentModelService
         {
             var f = new FieldDefinition
             {
-                Id = Guid.NewGuid(),
                 Name = field.Name,
                 Type = field.Type,
                 Required = field.Required,
                 TargetContentModel = field.TargetContentModel,
                 Settings = field.Settings
             };
-            clone.Fields.Add(f);
+            clone.AddField(f);
         }
 
         return clone;
+    }
+
+    private async Task<List<Branch>> BuildBranchChainAsync(Guid tenantId, Guid leafBranchId, CancellationToken cancellationToken)
+    {
+        var chain = new List<Branch>();
+        var current = await _branchRepository.GetAsync(tenantId, leafBranchId, cancellationToken);
+        while (current is not null)
+        {
+            chain.Add(current);
+            if (current.ParentBranchId is null) break;
+            current = await _branchRepository.GetAsync(tenantId, current.ParentBranchId.Value, cancellationToken);
+        }
+
+        chain.Reverse();
+        return chain;
+    }
+
+    private async Task EnsureNotDefault(Guid tenantId, Guid branchId, CancellationToken cancellationToken)
+    {
+        var branch = await _branchRepository.GetAsync(tenantId, branchId, cancellationToken);
+        if (branch is not null && branch.IsDefault)
+        {
+            throw new InvalidOperationException("Cannot merge into default branch directly.");
+        }
+    }
+
+    private async Task EnsureBranchWritable(Guid tenantId, Guid branchId, CancellationToken cancellationToken)
+    {
+        var branch = await _branchRepository.GetAsync(tenantId, branchId, cancellationToken);
+        if (branch is null) throw new InvalidOperationException("Branch not found.");
+        if (branch.State == BranchState.Protected || branch.State == BranchState.Archived)
+        {
+            throw new InvalidOperationException("Branch is protected or archived.");
+        }
     }
 }

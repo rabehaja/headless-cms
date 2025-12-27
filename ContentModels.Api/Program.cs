@@ -32,6 +32,7 @@ builder.Services.AddScoped<StackService>();
 builder.Services.AddScoped<ContentModelService>();
 builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
+builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 builder.Services.AddScoped<IStackRepository, StackRepository>();
 builder.Services.AddScoped<IContentModelRepository, ContentModelRepository>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

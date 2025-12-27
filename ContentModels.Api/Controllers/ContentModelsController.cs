@@ -18,11 +18,11 @@ public class ContentModelsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ContentModel>>> GetModels(Guid stackId, Guid tenantId, Guid branchId)
+    public async Task<ActionResult<IEnumerable<ContentModel>>> GetModels(Guid stackId, Guid tenantId, Guid branchId, [FromQuery] bool inherit = false)
     {
         try
         {
-            var models = await _contentModelService.GetByBranchAsync(stackId, tenantId, branchId);
+            var models = await _contentModelService.GetByBranchAsync(stackId, tenantId, branchId, inherit);
             return Ok(models);
         }
         catch (InvalidOperationException)
@@ -32,9 +32,9 @@ public class ContentModelsController : ControllerBase
     }
 
     [HttpGet("{modelId:guid}")]
-    public async Task<ActionResult<ContentModel>> GetModel(Guid stackId, Guid tenantId, Guid branchId, Guid modelId)
+    public async Task<ActionResult<ContentModel>> GetModel(Guid stackId, Guid tenantId, Guid branchId, Guid modelId, [FromQuery] bool inherit = false)
     {
-        var model = await _contentModelService.GetAsync(stackId, tenantId, branchId, modelId);
+        var model = await _contentModelService.GetAsync(stackId, tenantId, branchId, modelId, inherit);
         return model is null ? NotFound() : Ok(model);
     }
 

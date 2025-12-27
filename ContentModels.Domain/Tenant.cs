@@ -8,7 +8,7 @@ public class Tenant
     public Guid StackId { get; set; }
     public List<Branch> Branches { get; set; } = new();
 
-    public Branch AddBranch(string name)
+    public Branch AddBranch(string name, bool isDefault = false, Guid? parentBranchId = null)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -20,7 +20,22 @@ public class Tenant
             throw new InvalidOperationException($"Branch with name '{name}' already exists in this tenant.");
         }
 
-        var branch = new Branch { Name = name.Trim(), TenantId = Id };
+        if (isDefault || Branches.All(b => !b.IsDefault))
+        {
+            foreach (var b in Branches)
+            {
+                b.IsDefault = false;
+            }
+            isDefault = true;
+        }
+
+        var branch = new Branch
+        {
+            Name = name.Trim(),
+            TenantId = Id,
+            IsDefault = isDefault,
+            ParentBranchId = parentBranchId
+        };
         Branches.Add(branch);
         return branch;
     }
